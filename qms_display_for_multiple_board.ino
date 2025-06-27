@@ -36,24 +36,41 @@ void display_updater() {
 // ESP-NOW receive callback
 void onReceive(uint8_t *mac, uint8_t *incomingData, uint8_t len) {
   Serial.print("Received ESP-NOW from MAC: ");
-  for (int i = 0; i < 6; i++) { 
-    Serial.printf("%02X%s", mac[i], i < 5 ? ":" : "\n"); 
-  }
+  for (int i = 0; i < 6; i++) Serial.printf("%02X%s", mac[i], i < 5 ? ":" : "\n");
 
+  // Case 1: If message is just an int
   if (len == sizeof(int)) {
     int nextPatient;
     memcpy(&nextPatient, incomingData, sizeof(int));
-    
+
     for (int i = 0; i < 4; i++) {
       if (memcmp(mac, doctorMACs[i], 6) == 0) {
         docNumbers[i] = nextPatient;
         Serial.printf(" -> Doctor %d number updated to %d\n", i + 1, nextPatient);
-        drawAllNumbers();  // ✅ Only redraw on update
+        drawAllNumbers();
         break;
       }
     }
   }
+
+  // ✅ Case 2: Full QueueItem struct (Doctor sends full packet instead of just int)
+  else if (len == sizeof(QueueItem)) {
+    QueueItem item;
+    memcpy(&item, incomingData, sizeof(item));
+    
+    int doctorIdx = item.node - 1;
+    if (doctorIdx >= 0 && doctorIdx < 4) {
+      docNumbers[doctorIdx] = item.number;
+      Serial.printf(" -> Doctor %d number updated (via QueueItem) to %d\n", doctorIdx + 1, item.number);
+      drawAllNumbers();
+    }
+  }
+
+  else {
+    Serial.println("❌ Unknown packet length. Ignored.");
+  }
 }
+
 
 
 // Draw all four "NEXT n" lines on the display
