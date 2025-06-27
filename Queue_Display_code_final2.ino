@@ -73,9 +73,12 @@ void drawPatientNumber(int number) {
   Serial.printf("Patient No: %d\n", number);
 if(number == Number1){
   if(number<10){
-  display.setCursor(88, 6 );
-  }else{
-    display.setCursor(77, 6 );
+  display.setCursor(86, 6 );
+  }else if(number<100){
+    display.setCursor(76, 6 );
+    }
+  else{
+    display.setCursor(66, 6 );
     }
   display.setTextSize(3);
   display.print(number);
@@ -84,9 +87,11 @@ if(number == Number1){
     display.clearDisplay();
     Number1=number;
      if(number<10){
-  display.setCursor(88, 6 );
-  }else{
-    display.setCursor(77, 6 );
+  display.setCursor(86, 6 );
+  }else if(number<100){
+    display.setCursor(76, 6 );
+    }else{
+    display.setCursor(66, 6 );
     }
   display.setTextSize(3);
   display.print(number);
